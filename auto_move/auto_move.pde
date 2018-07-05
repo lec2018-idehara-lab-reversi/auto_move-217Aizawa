@@ -6,10 +6,10 @@ final int BANSIZE = 640;
 final int CELLSIZE = BANSIZE / 8;
 final int STONESIZE = round(CELLSIZE * 0.9);
 
-final int HITO = 1;
-final int COMP = 2;
+final int HITO = 1;      //Player
+final int COMP = 2;      //Computer
 
-int KUROBAN = HITO;
+int KUROBAN = COMP;      
 int SHIROBAN = COMP;
 
 int[][] ban;
@@ -49,13 +49,18 @@ void showBan(int[][] b)
 {
   // もし、現在の手番の人が石を置けないならば
   // 連続パス回数を１回増やして、手番をさらに先に送る
-
-
+  if(countPlacable(b, teban) == 0){
+    passcount++;
+    teban = -teban;
+  }
+  
+  
   // 連続パス回数が２回になったら（＝白黒どちらもパスしなければいけなかったら）
   // ゲーム終了
   if( passcount >= 2 )
   {
     showResult(ban);
+    noLoop();
   }
   
   // コンピュータの番ならば、石を置く
@@ -225,7 +230,7 @@ int put(int[][] b, int te, int x, int y)
 }
 
 // 置ける場所を数える関数（盤面 b、手番 te）　→　答：置ける場所の数
-int countPlaceable(int[][] b, int te)
+int countPlacable(int[][] b, int te)
 {
   int result = 0;
   for(int y=1; y<=8; y++)
@@ -233,7 +238,10 @@ int countPlaceable(int[][] b, int te)
     for(int x=1; x<=8; x++)
     {
       // b の (x,y) に te が石を置けるなら、result を１増やす
- 
+      if(turn(ban, teban, x, y) != 0){
+        
+        result++;
+      }
       
     }
   }
@@ -248,8 +256,14 @@ void showResult(int[][] b)
   {
     for(int x=1; x<=8; x++)
     {
-      // もし b[x][y] が黒なら countb を１増やす。      
+      // もし b[x][y] が黒なら countb を１増やす。  
+      if(b[x][y] == KURO){
+        countb++;
+      }
       // もし b[x][y] が白なら countw を１増やす。
+      if(b[x][y] == SHIRO){
+        countw++;
+      }
     }
   }
   
@@ -278,16 +292,19 @@ Move getMove(int[][] b, int te)
 void autoPutStone()
 {
   // どこに置きたいか問い合わせて
-  Move m = getMove(ban, teban);
+  Move m = getMove(ban, teban);    //x,yがセットに
   
   // パスでなければ置く。手番を変える。連続パス回数を０にする
   if( m.x != 0 )
   {
-
+    put(ban, teban, m.x, m.y);//追加
+    teban = -teban;
+    passcount = 0;
   }
   // パスなら、手番を変える。連続パス回数を１増やす。
   else
   {
-
+    teban = -teban;//追加
+    passcount++;
   }
 }
